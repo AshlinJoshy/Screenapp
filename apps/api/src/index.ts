@@ -6,6 +6,11 @@ import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
 import { authRouter } from "./routes/auth.js";
 import { screensRouter } from "./routes/screens.js";
+import { creativesRouter } from "./routes/creatives.js";
+import { campaignsRouter } from "./routes/campaigns.js";
+import { approvalsRouter } from "./routes/approvals.js";
+import { playerRouter } from "./routes/player.js";
+import { pricingRouter } from "./routes/pricing.js";
 
 const app = new Hono();
 
@@ -33,6 +38,11 @@ app.get("/health", (c) =>
 
 app.route("/api/auth", authRouter);
 app.route("/api/screens", screensRouter);
+app.route("/api/creatives", creativesRouter);
+app.route("/api/campaigns", campaignsRouter);
+app.route("/api/approvals", approvalsRouter);
+app.route("/api/player", playerRouter);
+app.route("/api", pricingRouter);      // /api/screens/:id/pricing + /api/auction/preview
 
 // ─── Error Handling ──────────────────────────────────────────────────────────
 
