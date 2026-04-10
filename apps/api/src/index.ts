@@ -11,6 +11,7 @@ import { campaignsRouter } from "./routes/campaigns.js";
 import { approvalsRouter } from "./routes/approvals.js";
 import { playerRouter } from "./routes/player.js";
 import { pricingRouter } from "./routes/pricing.js";
+import { analyticsRouter } from "./routes/analytics.js";
 
 const app = new Hono();
 
@@ -43,6 +44,7 @@ app.route("/api/campaigns", campaignsRouter);
 app.route("/api/approvals", approvalsRouter);
 app.route("/api/player", playerRouter);
 app.route("/api", pricingRouter);      // /api/screens/:id/pricing + /api/auction/preview
+app.route("/api/analytics", analyticsRouter);
 
 // ─── Error Handling ──────────────────────────────────────────────────────────
 

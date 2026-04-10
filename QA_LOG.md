@@ -157,7 +157,7 @@
 
 ---
 
-## Phase 4 — Bidding Engine
+## Phase 4 — Bidding Engine (Worker)
 
 | ID | Test | How | Status | Fix / Notes |
 |----|------|-----|--------|-------------|
@@ -171,8 +171,8 @@
 | BID-008 | Oversubscribed: allocation is proportional to demand | Unit test | ✅ PASS | 2026-04-09 |
 | BID-009 | Higher budget = higher impression% (proportional) | Unit test | ✅ PASS | 2026-04-09 |
 | BID-010 | Longer impression + 2x budget = same impressions as shorter + half budget | Unit test | ✅ PASS | 2026-04-09 |
-| BID-011 | Auction worker runs hourly and writes results | Integration test | 🔄 Pending | Phase 4 — worker not yet built |
-| BID-012 | Daily budget enforced — ad pauses when limit hit | Integration test | 🔄 Pending | Phase 4 — worker not yet built |
+| BID-011 | Auction worker built: BullMQ queues, hourly cron, per-screen allocation, upserts auction_hourly_results | Code review | ✅ PASS | 2026-04-10 — apps/worker/src/jobs/auction.ts |
+| BID-012 | Daily budget enforced — ad groups paused when totalSpendCents ≥ dailyBudgetCents | Code review | ✅ PASS | 2026-04-10 — pause logic in processScreen(); reset in budgetReset.ts |
 | BID-013 | Preview function returns accurate CPI estimate | Vitest (unit) | ✅ PASS | 2026-04-09 — Fixed: `estimatedDailyImpressions` now uses `floor(dailyBudget/CPI)` instead of hourly buckets |
 
 ---
@@ -181,11 +181,18 @@
 
 | ID | Test | How | Status | Fix / Notes |
 |----|------|-----|--------|-------------|
-| AN-001 | Campaign analytics returns impression count | Vitest | 🔄 Pending | |
-| AN-002 | Campaign analytics returns total spend | Vitest | 🔄 Pending | |
-| AN-003 | Screen analytics returns owner revenue | Vitest | 🔄 Pending | |
-| AN-004 | Platform analytics returns total revenue (admin only) | Vitest | 🔄 Pending | |
-| AN-005 | Non-admin cannot access platform analytics → 403 | Vitest | 🔄 Pending | |
+| AN-001 | Campaign analytics returns impression count → 200 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-001b | Advertiser cannot see another's campaign analytics → 404 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-001c | No auth → 401 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-001d | Owner cannot access campaign analytics → 403 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-002 | Campaign analytics includes total spend → 200 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-002b | Admin can see any campaign analytics → 200 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-003 | Screen analytics returns owner revenue → 200 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-003b | Owner cannot see another owner's screen analytics → 404 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-003c | Advertiser cannot access screen analytics → 403 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-004 | Platform analytics returns total revenue (admin only) → 200 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-005 | Non-admin cannot access platform analytics → 403 | Vitest | ✅ PASS | 2026-04-10 |
+| AN-005b | Owner cannot access platform analytics → 403 | Vitest | ✅ PASS | 2026-04-10 |
 
 ---
 
@@ -214,6 +221,8 @@
 | I-004 | Low | BID-013 | Test used approximate `M(5)=0.44` but actual formula gives `0.43979…` — difference ~4 cents exceeded `toBeCloseTo(value, 0)` tolerance | ✅ Fixed — Test now computes expected with same `log10()` formula as production code |
 | I-005 | Low | BID-013 | `estimatedDailyImpressions` used `floor(hourlyBudget/CPI) × 24` — for expensive screens, hourly allocation rounds down to 0, giving 0 daily impressions even when budget covers several per day | ✅ Fixed — Changed to `floor(dailyBudget/CPI)` which correctly counts total daily impressions |
 | I-006 | Medium | CP-002–CP-005 | Test bodies used non-UUID strings (`"screen-uuid-1"`, `"creative-uuid-1"`) in fields validated as `z.string().uuid()` — zValidator returned 400 before route handler ran, leaving `mockResolvedValueOnce` queue items unconsumed, causing mock queue pollution for subsequent tests (CP-005 got 403, submit-no-ads got 404) | ✅ Fixed — Changed all test UUIDs to proper RFC 4122 format (e.g. `"11111111-1111-1111-1111-111111111111"`) |
+| I-007 | Medium | AN-001–AN-004 | Analytics aggregate queries (count/sum) ended at `.where()` — mock returned `this` (mockDb) synchronously; `await mockDb` resolved to the object; destructuring `const [row] = mockDb` gave undefined, then route threw TypeError → 500 instead of 200 | ✅ Fixed — Added `.limit(1)` to all single-row aggregate queries in analytics.ts |
+| I-008 | Low | AN-004 | Platform topScreens test used `groupBy.mockResolvedValueOnce([])` but chain continues `.orderBy().limit(10)`; calling `.orderBy()` on a Promise throws TypeError | ✅ Fixed — Changed to `limit.mockResolvedValueOnce([])` as 3rd limit mock for topScreens |
 
 ---
 
@@ -225,9 +234,9 @@
 | Test framework | Vitest 3.2.4 |
 | Test database | Mocked (vi.mock on db.ts) — no real DB needed for unit/integration tests |
 | API test client | Hono native `app.request()` |
-| Last full run | 2026-04-09 — **106/106 PASS** (6 test files) |
+| Last full run | 2026-04-10 — **118/118 PASS** (7 test files) |
 | Run command | `pnpm --filter @adscreen/api test` |
 
 ---
 
-*Last updated: 2026-04-09*
+*Last updated: 2026-04-10*
