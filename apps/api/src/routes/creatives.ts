@@ -139,10 +139,17 @@ creativesRouter.post(
       aspectRatio = computeAspectRatio(body.widthPx, body.heightPx);
     }
 
+    const isR2Configured = !!(
+      process.env.R2_ACCOUNT_ID &&
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY
+    );
+
     const [updated] = await db
       .update(creatives)
       .set({
-        status: "processing", // worker will set to 'ready' after processing
+        status: isR2Configured ? "processing" : "ready",
+        storageUrl: isR2Configured ? undefined : `https://placeholder.adscreen.io/creatives/${creativeId}`,
         durationSec: body.durationSec?.toString(),
         widthPx: body.widthPx,
         heightPx: body.heightPx,
