@@ -1,0 +1,5 @@
+[phases.install]
+cmds = ['npm install -g pnpm', 'cd /app && pnpm install --frozen-lockfile=false']
+
+[phases.build]
+cmds = ['cd /app && pnpm build']
