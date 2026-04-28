@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdScreen Deployment Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; line-height: 1.6; }
+  .cover { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+  .cover h1 { font-size: 3.5rem; font-weight: 800; background: linear-gradient(90deg, #00d4ff, #7b2ff7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
+  .cover p { font-size: 1.2rem; color: #94a3b8; margin-bottom: 40px; }
+  .badge-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
+  .badge { padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+  .badge.green { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .badge.blue { background: #0c1a3a; color: #60a5fa; border: 1px solid #1e3a8a; }
+  .badge.purple { background: #1e0a3c; color: #c084fc; border: 1px solid #6b21a8; }
+  .toc { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; text-align: left; }
+  .toc h2 { color: #94a3b8; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+  .toc-item { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #2d2d4e; }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  .num-orange { background: #f97316; color: #fff; }
+  .num-red { background: #ef4444; color: #fff; }
+  .num-green { background: #22c55e; color: #fff; }
+  .num-blue { background: #3b82f6; color: #fff; }
+  .num-purple { background: #a855f7; color: #fff; }
+  .toc-item span { font-size: 1rem; font-weight: 500; color: #e2e8f0; }
+  .toc-item small { color: #64748b; font-size: 0.8rem; display: block; }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 60px 32px; }
+  .section-header { display: flex; align-items: center; gap: 20px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #1e293b; }
+  .section-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+  .icon-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+  .icon-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  .icon-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .icon-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .icon-purple { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+  .section-title h2 { font-size: 1.8rem; font-weight: 700; color: #f1f5f9; }
+  .section-title p { color: #64748b; font-size: 0.95rem; margin-top: 4px; }
+
+  .step { background: #111827; border: 1px solid #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 16px; position: relative; }
+  .step-number { position: absolute; top: -12px; left: 20px; background: #7b2ff7; color: white; font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 10px; letter-spacing: 1px; text-transform: uppercase; }
+  .step h3 { font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin-bottom: 10px; margin-top: 4px; }
+  .step p { color: #94a3b8; font-size: 0.92rem; margin-bottom: 8px; }
+  .step p:last-child { margin-bottom: 0; }
+
+  .arrow { color: #7b2ff7; margin: 0 6px; font-weight: 700; }
+  .highlight { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px 20px; margin: 12px 0; }
+  .highlight code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.88rem; color: #7dd3fc; word-break: break-all; }
+  .highlight .label { font-size: 0.7rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  .warning { background: #1c1400; border: 1px solid #854d0e; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .warning p { color: #fbbf24; font-size: 0.88rem; }
+  .warning p::before { content: "⚠️ "; }
+
+  .tip { background: #042f2e; border: 1px solid #134e4a; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .tip p { color: #34d399; font-size: 0.88rem; }
+  .tip p::before { content: "✅ "; }
+
+  .env-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+  .env-table th { background: #1e293b; color: #94a3b8; text-align: left; padding: 10px 14px; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+  .env-table td { padding: 10px 14px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+  .env-table tr:last-child td { border-bottom: none; }
+  .env-table .var { font-family: 'SF Mono', 'Fira Code', monospace; color: #7dd3fc; }
+  .env-table .val { color: #94a3b8; }
+  .env-table .val.real { color: #4ade80; }
+  .env-table .val.skip { color: #475569; font-style: italic; }
+
+  .divider { border: none; border-top: 1px solid #1e293b; margin: 48px 0; }
+
+  .final-box { background: linear-gradient(135deg, #0f0f23, #1a0a3c); border: 1px solid #4c1d95; border-radius: 16px; padding: 32px; margin-top: 40px; text-align: center; }
+  .final-box h2 { font-size: 1.6rem; color: #e9d5ff; margin-bottom: 16px; }
+  .final-box p { color: #94a3b8; margin-bottom: 8px; }
+  .url-pill { display: inline-block; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 8px 16px; font-family: monospace; color: #7dd3fc; font-size: 0.9rem; margin: 4px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } .cover h1 { font-size: 2.2rem; } }
+
+  @media print {
+    body { background: white; color: black; }
+    .cover { background: #1a1a2e; min-height: auto; padding: 60px 40px; page-break-after: always; }
+    .page { padding: 40px 32px; }
+    .step { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <h1>AdScreen</h1>
+  <p>Full Deployment Guide — Railway · Supabase · Upstash · Vercel</p>
+  <div class="badge-row">
+    <span class="badge green">Free Tier Friendly</span>
+    <span class="badge blue">~20 min setup</span>
+    <span class="badge purple">No credit card required*</span>
+  </div>
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <div class="toc-item">
+      <div class="toc-num num-green">1</div>
+      <div><span>Supabase</span><small>PostgreSQL database + connection string</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-red">2</div>
+      <div><span>Upstash</span><small>Redis for BullMQ job queue</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-orange">3</div>
+      <div><span>Railway — API Service</span><small>Hono REST API, always-on</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-orange">4</div>
+      <div><span>Railway — Worker Service</span><small>BullMQ auction + budget jobs</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-blue">5</div>
+      <div><span>Database Migration</span><small>Push schema + seed admin user</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-purple">6</div>
+      <div><span>Vercel</span><small>Next.js web dashboard</small></div>
+    </div>
+    <div class="toc-item">
+      <div class="toc-num num-blue">7</div>
+      <div><span>Final Wiring</span><small>CORS + test the full flow</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1: SUPABASE -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-icon icon-green">🗄️</div>
+    <div class="section-title">
+      <h2>1 — Supabase (PostgreSQL)</h2>
+      <p>supabase.com · Free tier · No credit card needed</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Create an account & new project</h3>
+    <p>Go to <strong>supabase.com</strong> → Sign up → click <strong>New Project</strong></p>
+    <p>Fill in: <strong>Name</strong> = <code>adscreen</code> &nbsp;|&nbsp; <strong>Database Password</strong> = something strong (save it!) &nbsp;|&nbsp; <strong>Region</strong> = EU West (Ireland)</p>
+    <div class="warning"><p>Save your database password now — you cannot retrieve it later.</p></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Wait for provisioning</h3>
+    <p>Takes about 60–90 seconds. You'll see a green "Project is ready" banner.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Get the connection string</h3>
+    <p>Left sidebar <span class="arrow">→</span> <strong>Project Settings</strong> <span class="arrow">→</span> <strong>Database</strong> <span class="arrow">→</span> scroll to <strong>"Connection string"</strong></p>
+    <p>Click the <strong>URI</strong> tab. Copy the string. It looks like:</p>
+    <div class="highlight">
+      <div class="label">DATABASE_URL</div>
+      <code>postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxxxx.supabase.co:5432/postgres</code>
+    </div>
+    <p>Replace <code>[YOUR-PASSWORD]</code> with the password you set in Step 1.</p>
+    <div class="tip"><p>Use the "Transaction" mode connection string (port 6543) if you see connection limit errors.</p></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 4</div>
+    <h3>Copy to Railway</h3>
+    <p>Go to Railway <span class="arrow">→</span> API service <span class="arrow">→</span> Variables <span class="arrow">→</span> update <strong>DATABASE_URL</strong> with the string above.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 2: UPSTASH -->
+  <div class="section-header">
+    <div class="section-icon icon-red">⚡</div>
+    <div class="section-title">
+      <h2>2 — Upstash (Redis)</h2>
+      <p>upstash.com · Free tier · 10K commands/day</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Create account & Redis database</h3>
+    <p>Go to <strong>upstash.com</strong> → Sign up → <strong>Create Database</strong></p>
+    <p>Fill in: <strong>Name</strong> = <code>adscreen</code> &nbsp;|&nbsp; <strong>Type</strong> = Regional &nbsp;|&nbsp; <strong>Region</strong> = EU-West-1 (Ireland) &nbsp;|&nbsp; <strong>TLS</strong> = Enabled</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Get the Redis URL</h3>
+    <p>After creation, scroll down to the <strong>Connect</strong> section. Find the <strong>redis-cli</strong> command:</p>
+    <div class="highlight">
+      <div class="label">redis-cli command (shown on Upstash dashboard)</div>
+      <code>redis-cli --tls -u redis://default:YOUR_TOKEN@xxx.upstash.io:6379</code>
+    </div>
+    <p>Take that URL and change <code>redis://</code> to <code>rediss://</code> (double-s = TLS):</p>
+    <div class="highlight">
+      <div class="label">REDIS_URL to paste into Railway</div>
+      <code>rediss://default:YOUR_TOKEN@xxx.upstash.io:6379</code>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Copy to Railway</h3>
+    <p>Railway <span class="arrow">→</span> API service <span class="arrow">→</span> Variables <span class="arrow">→</span> update <strong>REDIS_URL</strong></p>
+    <p>Do the same for the <strong>Worker service</strong> Variables — it also needs <code>REDIS_URL</code>.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 3: RAILWAY API -->
+  <div class="section-header">
+    <div class="section-icon icon-orange">🚂</div>
+    <div class="section-title">
+      <h2>3 — Railway: API Service</h2>
+      <p>railway.app · $5 free trial credit · ~3 min deploy</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Create project from GitHub</h3>
+    <p>Railway dashboard <span class="arrow">→</span> <strong>+ New</strong> <span class="arrow">→</span> <strong>Deploy a GitHub Repository</strong> <span class="arrow">→</span> select <strong>AshlinJoshy/Screenapp</strong></p>
+    <p>Branch: <code>claude/project-analysis-qa-plan-Kbp16</code></p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Configure Settings tab</h3>
+    <div class="two-col">
+      <div class="highlight"><div class="label">Root Directory</div><code>/apps/api</code></div>
+      <div class="highlight"><div class="label">Start Command</div><code>node dist/index.js</code></div>
+    </div>
+    <div class="highlight"><div class="label">Build Command</div><code>pnpm install && pnpm build</code></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Generate a public domain</h3>
+    <p>Settings tab <span class="arrow">→</span> <strong>Networking</strong> section <span class="arrow">→</span> <strong>Generate Domain</strong></p>
+    <p>Save this URL — you'll need it for Vercel's <code>NEXT_PUBLIC_API_URL</code>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 4</div>
+    <h3>Add Variables</h3>
+    <table class="env-table">
+      <tr><th>Variable</th><th>Value</th></tr>
+      <tr><td class="var">DATABASE_URL</td><td class="val real">from Supabase (Step 1)</td></tr>
+      <tr><td class="var">REDIS_URL</td><td class="val real">from Upstash (rediss://...)</td></tr>
+      <tr><td class="var">JWT_SECRET</td><td class="val real">any random 40+ char string</td></tr>
+      <tr><td class="var">PORT</td><td class="val real">3001</td></tr>
+      <tr><td class="var">R2_BUCKET_NAME</td><td class="val real">adscreen-media</td></tr>
+      <tr><td class="var">CORS_ORIGIN</td><td class="val skip">add after Vercel deploy</td></tr>
+      <tr><td class="var">R2_ACCOUNT_ID</td><td class="val skip">skip for now</td></tr>
+      <tr><td class="var">R2_ACCESS_KEY_ID</td><td class="val skip">skip for now</td></tr>
+      <tr><td class="var">R2_SECRET_ACCESS_KEY</td><td class="val skip">skip for now</td></tr>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 4: RAILWAY WORKER -->
+  <div class="section-header">
+    <div class="section-icon icon-orange">⚙️</div>
+    <div class="section-title">
+      <h2>4 — Railway: Worker Service</h2>
+      <p>Same project, second service — runs auction & budget jobs</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Add a second service to the same project</h3>
+    <p>In your Railway project <span class="arrow">→</span> <strong>+ New Service</strong> <span class="arrow">→</span> <strong>GitHub Repo</strong> <span class="arrow">→</span> same repo + same branch</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Configure Settings tab</h3>
+    <div class="two-col">
+      <div class="highlight"><div class="label">Root Directory</div><code>/apps/worker</code></div>
+      <div class="highlight"><div class="label">Start Command</div><code>node dist/index.js</code></div>
+    </div>
+    <div class="highlight"><div class="label">Build Command</div><code>pnpm install && pnpm build</code></div>
+    <div class="warning"><p>Do NOT generate a public domain for the worker — it doesn't serve HTTP traffic.</p></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Add Variables (worker only needs 2)</h3>
+    <table class="env-table">
+      <tr><th>Variable</th><th>Value</th></tr>
+      <tr><td class="var">DATABASE_URL</td><td class="val real">same as API service</td></tr>
+      <tr><td class="var">REDIS_URL</td><td class="val real">same as API service (rediss://...)</td></tr>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 5: MIGRATIONS -->
+  <div class="section-header">
+    <div class="section-icon icon-blue">🗃️</div>
+    <div class="section-title">
+      <h2>5 — Run Database Migrations</h2>
+      <p>Do this once after the API service first deploys successfully</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Wait for API to go green</h3>
+    <p>In Railway, the API deployment shows a green ✓ when it's live. This takes 2–4 minutes on first deploy.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Open the Railway shell</h3>
+    <p>Click on the <strong>API service</strong> <span class="arrow">→</span> top tabs <span class="arrow">→</span> <strong>Shell</strong></p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Run these two commands in order</h3>
+    <div class="highlight">
+      <div class="label">Push schema to Supabase</div>
+      <code>pnpm --filter @adscreen/db db:push</code>
+    </div>
+    <div class="highlight">
+      <div class="label">Create admin user</div>
+      <code>pnpm --filter @adscreen/api seed:admin</code>
+    </div>
+    <div class="tip"><p>After this, your admin login is: admin@adscreen.io / Admin1234!</p></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 6: VERCEL -->
+  <div class="section-header">
+    <div class="section-icon icon-purple">▲</div>
+    <div class="section-title">
+      <h2>6 — Vercel (Next.js Dashboard)</h2>
+      <p>vercel.com · Free forever for hobby projects</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Import the GitHub repo</h3>
+    <p>Go to <strong>vercel.com</strong> → <strong>Add New Project</strong> → Import <strong>AshlinJoshy/Screenapp</strong></p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Configure the project</h3>
+    <p>Before deploying, expand <strong>Root Directory</strong> and set it to:</p>
+    <div class="highlight"><div class="label">Root Directory</div><code>apps/web</code></div>
+    <p>Framework should auto-detect as <strong>Next.js</strong>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Add environment variable</h3>
+    <table class="env-table">
+      <tr><th>Variable</th><th>Value</th></tr>
+      <tr><td class="var">NEXT_PUBLIC_API_URL</td><td class="val real">https://your-api.up.railway.app</td></tr>
+    </table>
+    <div class="warning"><p>Use the Railway domain from Section 3 Step 3 — no trailing slash.</p></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 4</div>
+    <h3>Deploy</h3>
+    <p>Click <strong>Deploy</strong>. Takes ~2 minutes. You'll get a URL like <code>screenapp-xxx.vercel.app</code>.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SECTION 7: FINAL WIRING -->
+  <div class="section-header">
+    <div class="section-icon icon-blue">🔗</div>
+    <div class="section-title">
+      <h2>7 — Final Wiring</h2>
+      <p>One last variable to connect frontend ↔ backend</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 1</div>
+    <h3>Add CORS_ORIGIN to Railway API</h3>
+    <p>Railway <span class="arrow">→</span> API service <span class="arrow">→</span> Variables <span class="arrow">→</span> add:</p>
+    <table class="env-table">
+      <tr><th>Variable</th><th>Value</th></tr>
+      <tr><td class="var">CORS_ORIGIN</td><td class="val real">https://your-app.vercel.app</td></tr>
+    </table>
+    <p>This triggers a redeploy automatically. Wait ~1 min.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 2</div>
+    <h3>Test the health endpoint</h3>
+    <p>Open in browser:</p>
+    <div class="highlight"><div class="label">Should return: {"status":"ok",...}</div><code>https://your-api.up.railway.app/health</code></div>
+  </div>
+
+  <div class="step">
+    <div class="step-number">Step 3</div>
+    <h3>Log in to the dashboard</h3>
+    <p>Open your Vercel URL → log in with:</p>
+    <div class="two-col">
+      <div class="highlight"><div class="label">Email</div><code>admin@adscreen.io</code></div>
+      <div class="highlight"><div class="label">Password</div><code>Admin1234!</code></div>
+    </div>
+  </div>
+
+  <div class="final-box">
+    <h2>🎉 You're live!</h2>
+    <p>Your full AdScreen platform is running at:</p>
+    <br>
+    <span class="url-pill">Dashboard → your-app.vercel.app</span>
+    <span class="url-pill">API → your-api.up.railway.app</span>
+    <br><br>
+    <p style="color:#64748b; font-size:0.85rem;">Test flow: Register owner → Register screen → Register advertiser → Create creative → Create campaign → Owner approves → Player shows ads</p>
+  </div>
+</div>
+
+</body>
+</html>
