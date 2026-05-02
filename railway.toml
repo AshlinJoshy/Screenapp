@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @adscreen/api build"
+
+[deploy]
+startCommand = "pnpm --filter @adscreen/api start"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
