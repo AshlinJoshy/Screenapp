@@ -1,0 +1,32 @@
+{
+    "name": "@adscreen/web",
+    "version": "0.0.1",
+    "private": true,
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+          "dev": "next dev --port 3000",
+          "build": "next build",
+          "start": "next start --port 3000",
+          "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+          "@adscreen/types": "workspace:*",
+          "next": "15.3.8",
+          "react": "^19.0.0",
+          "react-dom": "^19.0.0",
+          "jose": "^6.0.10",
+          "lucide-react": "^0.503.0",
+          "clsx": "^2.1.1"
+    },
+    "devDependencies": {
+          "@types/node": "^22.0.0",
+          "@types/react": "^19.0.0",
+          "@types/react-dom": "^19.0.0",
+          "typescript": "^5.7.3",
+          "tailwindcss": "^4.1.4",
+          "@tailwindcss/postcss": "^4.1.4",
+          "postcss": "^8.5.3"
+    }
+}

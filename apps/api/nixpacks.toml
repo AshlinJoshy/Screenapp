@@ -1,0 +1,11 @@
+providers = ['node']
+
+[phases.setup]
+nixPkgs = ['nodejs_20']
+cmds = ['corepack enable && corepack prepare pnpm@10.32.1 --activate']
+
+[phases.install]
+cmds = ['pnpm install --frozen-lockfile']
+
+[phases.build]
+cmds = ['pnpm --filter @adscreen/api build']
